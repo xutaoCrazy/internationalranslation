@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <el-container>
-      <el-header>  
+      <el-header>
         <el-input v-model="input" placeholder="请输入内容" style="width:200px"  clearable></el-input>
         <el-button type="primary" @click='a'>翻译</el-button>
       </el-header>
@@ -41,133 +41,139 @@
   </div>
 </template>
 <script>
-import tableJson from '/Users/zhangahong/zcs_projects/service-platfrom-admin/src/lang/zh.js'
+import tableJson from '@/zh.js'
+// import jsonp from '@/common/jsonp.js'
+import { v1 as uuidv1 } from 'uuid'
+import axios from 'axios' // 引入axios
+
 export default {
   name: 'HelloWorld',
   data () {
     return {
-      input:'',
-      tableData:[],
+      input: '',
+      tableData: []
     }
   },
-  mounted() {
+  mounted () {
     console.log(tableJson)
+    console.log()
+    console.log()
   },
   methods: {
-    randomWord(min,demo) {
-    debugger;
-    this.$t('zuptjasg7d53w44tnjtbhxt'/*徐涛*/);
-  
-    var str = "z",
-        range = min,
-        arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    // 随机产生
-    
-    for (var i = 0; i < range; i++) {
-         var pos = Math.round(Math.random() * (arr.length - 1));
-        str += arr[pos];
-    }
-    var b=str + this.randomString(7)
-    var json={};
-    json.a=b+':'+demo+',';
-    json.c="{{$t('"+b+"'/*"+demo+"*/)}}"  
-    json.f="$t('"+b+"'/*"+demo+"*/)"  
-    json.g="this.$t('"+b+"'/*"+demo+"*/)"  
-    json.d=b,
-    json.input=demo
-    return json;
+    randomWord (min, demo) {
+      var b = 'f' + uuidv1().replace(/-/g, '')
+      var json = {}
+      json.a = b + ':' + demo + ','
+      json.c = "{{$t('" + b + "'/*" + demo + '*/)}}'
+      json.f = "$t('" + b + "'/*" + demo + '*/)'
+      json.g = "this.$t('" + b + "'/*" + demo + '*/)'
+      json.d = b
+      json.input = demo
+      return json
     },
-    randomString(e) {  
-      e = e || 32;
-      var t = "abcdefghjkmnpqrstwxyzabcdefhijkmnprstwxyz2345678",
-      a = t.length,
-      n = "";
-      for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
+    editTableData () {
+      var pa = {
+        doctype: 'json',
+        type: 'AUTO',
+        i: '爱你'
+      }
+
+      axios.get('/translate', {params: JSON.stringify(pa)}).then(response => {
+        console.log(response)
+      })
+    },
+    randomString (e) {
+      e = e || 32
+      var t = 'abcdefghjkmnpqrstwxyzabcdefhijkmnprstwxyz2345678'
+      var a = t.length
+      var n = ''
+      for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a))
       return n
     },
-    a(){
-      debugger;
-      if(!this.input){
-        return 
+    a () {
+      // this.editTableData()
+      debugger
+      if (!this.input) {
+        return
       }
-      this.tableData=[];
-      var jsonTable={};
-      for(var item in  tableJson){
-        if(tableJson[item]==this.input){
-          jsonTable.key=item;
-          jsonTable.cn="{{$t('"+item+"'/*"+tableJson[item]+"*/)}}";
-          jsonTable.zh="$t('"+item+"'/*"+tableJson[item]+"*/)";
-          jsonTable.fn="this.$t('"+item+"'/*"+tableJson[item]+"*/)";
-          jsonTable.input=tableJson[item];
+      this.tableData = []
+      var jsonTable = {}
+      for (var item in tableJson) {
+        if (tableJson[item] === this.input) {
+          jsonTable.key = item
+          jsonTable.cn = "{{$t('" + item + "'/*" + tableJson[item] + '*/)}}'
+          jsonTable.zh = "$t('" + item + "'/*" + tableJson[item] + '*/)'
+          jsonTable.fn = "this.$t('" + item + "'/*" + tableJson[item] + '*/)'
+          jsonTable.input = tableJson[item]
         }
       }
-      if(JSON.stringify(jsonTable)=='{}'){
-      var localNum=[];
-      var  locaArr =JSON.parse(localStorage.getItem('local'))
-      if(locaArr){
-        for(var items in locaArr){
-          if(this.input==locaArr[items]){
-            localNum.push(1)
-            jsonTable.key=items;
-            jsonTable.cn="{{$t('"+items+"'/*"+this.input+"*/)}}";
-            jsonTable.zh="$t('"+items+"'/*"+this.input+"*/)";
-            jsonTable.fn="this.$t('"+items+"'/*"+this.input+"*/)";
-            jsonTable.input=this.input;
+      if (JSON.stringify(jsonTable) === '{}') {
+        var localNum = []
+        var locaArr = JSON.parse(localStorage.getItem('local'))
+        if (locaArr) {
+          for (var items in locaArr) {
+            if (this.input === locaArr[items]) {
+              localNum.push(1)
+              jsonTable.key = items
+              jsonTable.cn = "{{$t('" + items + "'/*" + this.input + '*/)}}'
+              jsonTable.zh = "$t('" + items + "'/*" + this.input + '*/)'
+              jsonTable.fn = "this.$t('" + items + "'/*" + this.input + '*/)'
+              jsonTable.input = this.input
+            }
+          }
+        }
+        if (localNum.length === 0) {
+          var a = this.randomWord(15, this.input)
+          jsonTable.key = a.d
+          jsonTable.cn = a.c
+          jsonTable.zh = a.f
+          jsonTable.fn = a.g
+          jsonTable.input = a.input
+        }
+        if (localNum.length === 0) {
+          if (locaArr) {
+            locaArr[a.d] = a.input
+            localStorage.setItem('local', JSON.stringify(locaArr)) //  第一个值为key，第二个值为value，value可以是变量
+          } else {
+            var jsonCn = {}
+            jsonCn[a.d] = a.input
+            localStorage.setItem('local', JSON.stringify(jsonCn)) //  第一个值为key，第二个值为value，value可以是变量
           }
         }
       }
-      if(localNum.length==0){
-        var  a=this.randomWord(15,this.input);
-        jsonTable.key=a.d;
-        jsonTable.cn=a.c;
-        jsonTable.zh=a.f;
-        jsonTable.fn=a.g;
-        jsonTable.input=a.input;
-      }
-      if(localNum.length==0){
-        if(locaArr){
-          locaArr[a.d]=a.input
-          localStorage.setItem('local',JSON.stringify(locaArr)) //  第一个值为key，第二个值为value，value可以是变量
-        }else{
-          var jsonCn={}
-          jsonCn[a.d]=a.input
-          localStorage.setItem('local',JSON.stringify(jsonCn)) //  第一个值为key，第二个值为value，value可以是变量
-        }
-      }
-      }
       this.tableData.push(jsonTable)
-      console.log(this.randomWord(15,this.input))
+      console.log(this.randomWord(15, this.input))
     },
-    rowClick(row, column, cell, event){
+    rowClick (row, column, cell, event) {
       console.log(row, column, cell, event)
-      let _this = this;
-      var html=''
-      if(column.label=='js'){
-        html=row.cn
-      }else if(column.label=='html'){
-        html=row.zh
-      }else if(column.label=='fn'){
-        html=row.fn
+      let _this = this
+      var html = ''
+      if (column.label === 'js') {
+        html = row.cn
+      } else if (column.label === 'html') {
+        html = row.zh
+      } else if (column.label === 'fn') {
+        html = row.fn
       }
       this.$copyText(html).then(
         function (e) {
           _this.$message({
             showClose: true,
-            message: "复制成功"+html,
-            type: "success",
-          });
+            message: '复制成功' + html,
+            type: 'success'
+          })
         },
         function (e) {
           _this.$message({
             showClose: true,
-            message: "复制失败，请手动复制",
-            type: "error",
-          });
+            message: '复制失败，请手动复制',
+            type: 'error'
+          })
         }
-      );
-    },
-    
-  },
+      )
+    }
+
+  }
 }
 </script>
 
